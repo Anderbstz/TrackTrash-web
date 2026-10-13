@@ -1,0 +1,130 @@
+/*
+ * tokens.css — Single source of truth for the TrackTrash design system.
+ *
+ * Every color, radius and typography primitive is defined here as a CSS
+ * custom property. Tailwind utilities are generated FROM these tokens via
+ * `@theme inline`, so the legacy panel CSS, the base components and any
+ * Tailwind class all resolve to the same values. Add new primitives here —
+ * never hardcode a color or radius elsewhere.
+ *
+ * "Tacho Vivo" level -> color mapping:
+ *   feliz       < 40%  -> brand-500  (#26C467)
+ *   preocupado  40-80% -> warning    (#F59E0B)
+ *   enojado     > 80%  -> danger     (#EF4444)
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Brand scale */
+  --brand-50: #EDFCF3;
+  --brand-100: #D2F7E1;
+  --brand-200: #A8EFC5;
+  --brand-300: #6FE2A0;
+  --brand-400: #43D37D;
+  --brand-500: #26C467;
+  --brand-600: #17A052;
+  --brand-700: #157F44;
+  --brand-800: #156538;
+  --brand-900: #12532F;
+  --brand-950: #072E1A;
+
+  /* Semantic colors */
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+
+  /* Neutrals (slate) */
+  --neutral-50: #F8FAFC;
+  --neutral-100: #F1F5F9;
+  --neutral-200: #E2E8F0;
+  --neutral-400: #94A3B8;
+  --neutral-600: #64748B;
+  --neutral-800: #334155;
+  --neutral-950: #0F172A;
+
+  /* Surfaces, borders and text (light) */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-soft: #f8fafc;
+  --surface-muted: #f1f5f9;
+  --border: #e2e8f0;
+  --fg: #0f172a;
+  --fg-mid: #334155;
+  --fg-muted: #64748b;
+  --fg-faint: #94a3b8;
+
+  /* Legacy aliases consumed by the existing panel CSS (globals.css).
+     They derive from the canonical --fg* tokens above so there is still a
+     single source of truth; do not redefine these values. */
+  --text: var(--fg);
+  --text-mid: var(--fg-mid);
+  --muted: var(--fg-muted);
+  --faint: var(--fg-faint);
+}
+
+.dark {
+  /* Surfaces, borders and text (dark) */
+  --bg: #08110d;
+  --surface: #0f1c16;
+  --surface-soft: #13231b;
+  --surface-muted: #1a2b22;
+  --border: #263c31;
+  --fg: #eefbf3;
+  --fg-mid: #d1e7da;
+  --fg-muted: #9bb3a6;
+  --fg-faint: #708a7c;
+}
+
+/*
+ * `inline` tells Tailwind to emit utilities that reference the runtime CSS
+ * variable (e.g. `.bg-surface { background-color: var(--surface) }`) instead
+ * of a static copy, so light/dark switching keeps working through the cascade.
+ */
+@theme inline {
+  /* Brand */
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-950: var(--brand-950);
+
+  /* Semantic */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+
+  /* Surfaces, borders and text */
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-muted: var(--surface-muted);
+  --color-bg: var(--bg);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-fg-mid: var(--fg-mid);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+
+  /* Typography */
+  --font-sans: var(--font-inter), "Geist", sans-serif;
+}
+
+/*
+ * Radii are literal values with no light/dark variation, so they live in a
+ * regular @theme block: no indirection, no self-reference.
+ */
+@theme {
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+  --radius-card: 12px;
+}
