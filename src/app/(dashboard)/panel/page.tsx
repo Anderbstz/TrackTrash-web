@@ -1,23 +1,29 @@
-"use client";
-
-import { useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
 import { MiniMap } from "@/components/dashboard/MiniMap";
 import { AlertsTable } from "@/components/dashboard/AlertsTable";
-import { alerts, kpis } from "@/lib/mock-data";
+import { DatePill } from "@/components/dashboard/DatePill";
+import { getAlertas, getKpis, getTendencia, listContenedores } from "@/lib/api/resources";
+import type { KpiId } from "@/lib/api/types";
 
-const emptySubscribe = () => () => {};
-const getToday = () => new Intl.DateTimeFormat("es-PE", { day: "numeric", month: "long", year: "numeric" }).format(new Date());
-const getTodayServer = () => "";
+const kpiMeta: Record<KpiId, { icon: IconName; tone: string }> = {
+  toneladas: { icon: "recycle", tone: "green" },
+  saturacion: { icon: "activity", tone: "amber" },
+  criticos: { icon: "alert", tone: "red" },
+  recicladores: { icon: "users", tone: "blue" },
+};
 
-export default function PanelPage() {
-  const router = useRouter();
-  const today = useSyncExternalStore(emptySubscribe, getToday, getTodayServer);
+export default async function PanelPage() {
+  const [kpis, tendencia, alertas, contenedores] = await Promise.all([
+    getKpis(),
+    getTendencia(),
+    getAlertas(),
+    listContenedores(),
+  ]);
 
   return <>
     <PageHeader
@@ -25,28 +31,31 @@ export default function PanelPage() {
       title="Panel general"
       subtitle="Resumen de la operación municipal en tiempo real."
       actions={<>
-        <div className="date-pill"><Icon name="calendar" size={17} /><span>{today}</span></div>
+        <DatePill />
         <Button variant="primary" icon="download">Exportar reporte</Button>
       </>}
     />
 
     <div className="kpi-grid">
-      {kpis.map(kpi => <KpiCard key={kpi.label} label={kpi.label} value={kpi.value} change={kpi.change} icon={kpi.icon} tone={kpi.tone} />)}
+      {kpis.items.map(item => {
+        const meta = kpiMeta[item.id];
+        return <KpiCard key={item.id} label={item.label} value={item.valor} change={item.cambio} icon={meta.icon} tone={meta.tone} />;
+      })}
     </div>
 
     <div className="overview-grid">
       <section className="card trend-card">
-        <div className="card-head"><div><div className="card-title">Residuos recuperados</div><div className="card-subtitle">Toneladas recolectadas durante junio</div></div><div className="metric-select"><span>Últimos 30 días</span><Icon name="chevron" size={15} /></div></div>
-        <div className="trend-summary"><strong>128,4 t</strong><span>+12,5%</span><small>respecto al periodo anterior</small></div>
-        <TrendChart />
+        <div className="card-head"><div><div className="card-title">{tendencia.titulo}</div><div className="card-subtitle">{tendencia.subtitulo}</div></div><div className="metric-select"><span>{tendencia.periodo}</span><Icon name="chevron" size={15} /></div></div>
+        <div className="trend-summary"><strong>{tendencia.total}</strong><span>{tendencia.cambio}</span><small>{tendencia.comparativa}</small></div>
+        <TrendChart serie={tendencia} />
       </section>
       <section className="card map-card">
-        <div className="card-head"><div><div className="card-title">Estado de contenedores</div><div className="card-subtitle">248 dispositivos monitoreados</div></div><Button variant="ghost" onClick={() => router.push("/mapa")}>Ver mapa <Icon name="arrow" size={16} /></Button></div>
-        <MiniMap />
+        <div className="card-head"><div><div className="card-title">Estado de contenedores</div><div className="card-subtitle">248 dispositivos monitoreados</div></div><Link href="/mapa" className="button button-ghost no-underline">Ver mapa <Icon name="arrow" size={16} /></Link></div>
+        <MiniMap contenedores={contenedores} />
       </section>
     </div>
 
-    <AlertsTable alerts={alerts} onViewAll={() => router.push("/alertas")} />
-    <div className="footer-note">Datos actualizados hace 2 minutos · Monitoreo IoT activo</div>
+    <AlertsTable alertas={alertas} viewAllHref="/alertas" />
+    <div className="footer-note">Datos actualizados {kpis.actualizadoEn.toLowerCase()} · Monitoreo IoT activo</div>
   </>;
 }
