@@ -1,9 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
-import { nav } from "@/lib/navigation";
+import { nav, settingsItem } from "@/lib/navigation";
 
-export function Sidebar({ active, onSelect }: { active: string; onSelect: (label: string) => void }) {
+export function Sidebar() {
+  const pathname = usePathname();
+  const itemClass = (href: string) => `nav-item no-underline ${pathname === href ? "active" : ""}`;
+
   return <aside className="sidebar">
     <div className="brand"><div className="brand-mark"><Icon name="recycle" size={21} /></div><div><div className="brand-name">TrackTrash</div><div className="brand-sub">Gestión municipal</div></div></div>
     <div className="tenant">
@@ -11,12 +16,12 @@ export function Sidebar({ active, onSelect }: { active: string; onSelect: (label
     </div>
     <nav className="nav">
       <div className="nav-label">MONITOREO</div>
-      {nav.slice(0, 6).map(([label, icon]) => <button key={label} className={`nav-item ${active === label ? "active" : ""}`} onClick={() => onSelect(label)}><Icon name={icon} size={19} /><span>{label}</span>{label === "Alertas" && <b>12</b>}</button>)}
+      {nav.slice(0, 6).map(item => <Link key={item.label} href={item.href} className={itemClass(item.href)}><Icon name={item.icon} size={19} /><span>{item.label}</span>{item.label === "Alertas" && <b>12</b>}</Link>)}
       <div className="nav-label nav-label-spaced">GESTIÓN</div>
-      {nav.slice(6).map(([label, icon]) => <button key={label} className={`nav-item ${active === label ? "active" : ""}`} onClick={() => onSelect(label)}><Icon name={icon} size={19} /><span>{label}</span></button>)}
+      {nav.slice(6).map(item => <Link key={item.label} href={item.href} className={itemClass(item.href)}><Icon name={item.icon} size={19} /><span>{item.label}</span></Link>)}
     </nav>
     <div className="sidebar-bottom">
-      <button className={`nav-item ${active === "Configuración" ? "active" : ""}`} onClick={() => onSelect("Configuración")}><Icon name="settings" size={19} /><span>Configuración</span></button>
+      <Link href={settingsItem.href} className={itemClass(settingsItem.href)}><Icon name="settings" size={19} /><span>Configuración</span></Link>
       <div className="system-health"><i /><div><strong>Sistema operativo</strong><span>Todos los sensores conectados</span></div></div>
     </div>
   </aside>;
